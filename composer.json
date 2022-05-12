@@ -1,0 +1,24 @@
+{
+	"minimum-stability": "dev",
+	"prefer-stable": true,
+	"autoload": {
+		"psr-4": {
+			"Mwf\\CustomLayouts\\" : "includes",
+			"Mwf\\CustomLayouts\\Widgets\\" : "Widgets",
+			"Mwf\\CustomLayouts\\PostTypes\\" : "PostTypes",
+			"Mwf\\CustomLayouts\\Taxonomies\\" : "Taxonomies",
+			"Mwf\\CustomLayouts\\FLBuilder\\" : "FLBuilder"
+		}
+	},
+	"require": {
+		"timber/timber": "^1.18",
+		"wpcl/wpconsole": "^1.0",
+		"htmlburger/carbon-fields": "^3.3",
+		"htmlburger/carbon-field-number": "^3.0",
+		"htmlburger/carbon-field-icon": "^3.1"
+	},
+	"scripts": {
+		"post-install-cmd": "npm install",
+		"post-update-cmd": "npm install"
+	}
+}

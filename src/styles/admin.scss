@@ -1,0 +1,50 @@
+@use 'sass:math';
+
+@mixin invisible() {
+    height: 0;
+    opacity: 0;
+    z-index: -1;
+    visibility: hidden;
+    margin: 0;
+    padding: 0;
+}
+.select2-container--default .select2-results__option[aria-selected=true] {
+	display: none;
+}
+.block-editor.block-hidden .is-root-container,
+.block-editor.block-hidden #elementor-editor,
+#post-body-content.block-hidden #postdivrich,
+#post-body-content.block-hidden .fl-builder-admin,
+#post-body-content.block-hidden #elementor-switch-mode,
+#post-body-content.block-hidden #elementor-editor {
+    @include invisible();
+}
+
+.custom_layout_metabox {
+	.cf-container__fields {
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		.cf-field {
+			flex-basis: 100%;
+			width: 100%;
+			@for $i from 1 through 12 {
+				&.cl_grid_#{$i} {
+					flex: unset;
+					width: #{ percentage(math.div($i, 12))};
+					flex-basis: #{ percentage(math.div($i, 12))};
+				}
+			}
+		}
+	}
+}
+
+.custom_layout_admin_metabox {
+	.cf-container__fields {
+		background: none !important;
+		border: none !important;
+		.cf-field {
+			border: none;
+		}
+	}
+}

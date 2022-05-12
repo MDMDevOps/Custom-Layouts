@@ -1,0 +1,47 @@
+{% if post.author.description %}
+
+	<aside id="cl_author" class="cl-author-box">
+
+		<div class="container">
+
+			<div class="author-image">
+
+				<img src="{{ post.author.avatar({ size: 100 }) }}" alt="{{post.author.name}}" width="100px" height="100px" />
+
+			</div>
+
+			<div class="author-info">
+
+				<header class="author-header">
+
+					<h4>{{post.author.name}}</h4>
+
+				</header>
+
+				<div class="author-body">
+
+					{{ post.author.description|shortcodes|wpautop }}
+
+				</div>
+
+				{% if post.author.links %}
+
+					<ul class="author-social-links">
+
+						{% for network, link in post.author.links %}
+
+							<li class="author-{{network}}"><a href="{{link.url}}" target='_blank'><span class="social-icon {{link.icon}}"></span><span class="screen-reader-text">{{network}}</span></a></li>
+
+						{% endfor %}
+
+					</ul>
+
+				{% endif %}
+
+			</div>
+
+		</div>
+
+	</aside>
+
+{% endif %}
