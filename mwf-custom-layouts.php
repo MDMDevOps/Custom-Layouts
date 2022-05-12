@@ -10,8 +10,9 @@
  * @wordpress-plugin
  * Plugin Name: Mid-West Family Custom Layouts
  * Plugin URI:  https://www.midwestfamilymadison.com
+ * GitHub Plugin URI:https://github.com/MDMDevOps/Custom-Layouts
  * Description: Custom layouts for (almost) any site
- * Version:     1.0.0
+ * Version:     0.1.0
  * Author:      Mid-West Family
  * Author URI:  https://www.midwestfamilymadison.com
  * License:     GPL-2.0+
