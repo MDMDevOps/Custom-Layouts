@@ -49,7 +49,7 @@ class ContextualRelatedPosts extends Framework {
 		return array_merge(
 			$templates,
 			[
-				'related-posts' => 'Related Posts',
+				'contextual-related-posts' => 'Contextual Related Posts',
 			]
 		);
 	}
@@ -89,9 +89,5 @@ class ContextualRelatedPosts extends Framework {
 		$_scope['related_posts'] = $posts;
 
 		return $_scope;
-	}
-
-	public function render() {
-// get_crp_posts_id
 	}
 }

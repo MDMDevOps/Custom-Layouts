@@ -506,8 +506,6 @@ class Admin extends Framework {
     		->set_options( apply_filters( 'custom_layouts/template_parts',
 	    			[
 	    				'author-box' => __( 'Author Box', 'scaffolding' ),
-	    				'blog-subscribe' => __( 'Blog Subscribe', 'scaffolding' ),
-	    				'social-sharing' => __( 'Social Sharing', 'scaffolding' ),
 	    			]
     			)
     		)
