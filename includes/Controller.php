@@ -50,6 +50,8 @@ class Controller extends Framework {
 				'hook' => carbon_get_post_meta( $id, 'cl_action_hook' ),
 				'priority' => carbon_get_post_meta( $id, 'cl_action_priority' ),
 				'type' => carbon_get_post_meta( $id, 'cl_editor_type' ),
+				'replace_content' => carbon_get_post_meta( $id, 'cl_action_disable_all' ),
+				'override' => carbon_get_post_meta( $id, 'cl_action_hook_override' ),
 				'include' => [],
 				'exclude' => [],
 			];
@@ -93,7 +95,7 @@ class Controller extends Framework {
 				}
 			}
 
-			$group[] = $data;
+			$group[$id] = $data;
 		}
 
 		return $group;
@@ -101,46 +103,11 @@ class Controller extends Framework {
 
 	public function getLayoutsForDisplay() {
 
-		// $cache_key = md5( $_SERVER['REQUEST_URI'] );
-
-		// $cache = maybe_unserialize( get_transient( 'custom_layouts_for_display' ) );
-
-		// if ( empty ( $cache ) || ! empty ( $cache ) || ! isset( $cache[ $cache_key ] ) ) {
-
-		// 	$cache = is_array( $cache ) ? $cache : [];
-
-		// 	$cache[ $cache_key ] = [];
-
-		// 	$layouts = $this->getLayouts();
-
-		// 	foreach ( $layouts as $layout ) {
-		// 		/**
-		// 		 * See if supposed to be exluded
-		// 		 */
-		// 		if ( $this->validate( $layout['exclude'], 'exclude', $layout['id'] ) === true ) {
-		// 			continue;
-		// 		}
-		// 		/**
-		// 		 * See if supposed to be included
-		// 		 */
-		// 		if ( $this->validate( $layout['include'], 'include', $layout['id'] ) === true ) {
-		// 			$cache[ $cache_key ][] = $layout;
-		// 		}
-		// 	}
-		// 	/**
-		// 	 * Update cache
-		// 	 */
-		// 	// set_transient( 'custom_layouts_for_display', maybe_serialize( $cache ), 0 );
-		// 	set_transient( 'custom_layouts_for_display', [], 0 );
-		// }
-
-		// return $cache[ $cache_key ];
-
 		$display = [];
 
 		$layouts = $this->getLayouts();
 
-		foreach ( $layouts as $layout ) {
+		foreach ( $layouts as $id => $layout ) {
 			/**
 			 * See if supposed to be exluded
 			 */
@@ -151,10 +118,14 @@ class Controller extends Framework {
 			 * See if supposed to be included
 			 */
 			if ( $this->validate( $layout['include'], 'include', $layout['id'] ) === true ) {
-				$display[] = $layout;
+				$display[$layout['id']] = $layout;
 			}
 		}
 
+
+		/**
+		 * Maybe remove overrides
+		 */
 		return $display;
 
 	}
@@ -562,12 +533,62 @@ class Controller extends Framework {
 				continue;
 			}
 
-			$priority = ! empty( $layout['priority'] ) ? $layout['priority'] : 10;
+			$layout['priority'] = ! empty( $layout['priority'] ) ? $layout['priority'] : 10;
 
 			do_action( 'custom_layouts/before_hook', $layout );
 
 			foreach ( $layout['hook'] as $hook ) {
-				add_action( $hook, ['\\Mwf\\CustomLayouts\\FrontEnd', "render_{$layout['id']}"], $priority );
+				/**
+				 * Pre-process layouts for removing all other actions
+				 */
+				if ( $layout['replace_content'] ) {
+
+					add_action( 'get_header', function() use ($layout, $hook) {
+						/**
+						 * If this action has been removed, bail...
+						 */
+						if ( ! has_action( $hook, ['\\Mwf\\CustomLayouts\\FrontEnd', "render_{$layout['id']}"] ) ) {
+							return;
+						}
+						else {
+							/**
+							 * Remove all actions
+							 */
+							remove_all_actions( $hook );
+							/**
+							 * Re-add our own
+							 */
+							add_action( $hook, ['\\Mwf\\CustomLayouts\\FrontEnd', "render_{$layout['id']}"], $layout['priority'] );
+						}
+					}, 0 );
+				}
+				/**
+				 * Pre-process for replacing *some* other items
+				 */
+				elseif ( ! empty( $layout['override'] ) ) {
+
+					add_action( 'get_header', function() use ($layout, $hook) {
+						/**
+						 * If this action has been removed, bail...
+						 */
+						if ( ! has_action( $hook, ['\\Mwf\\CustomLayouts\\FrontEnd', "render_{$layout['id']}"] ) ) {
+							return;
+						}
+
+						foreach ( $layout['override'] as $override_id ) {
+
+							$override_priority = carbon_get_post_meta( $override_id, 'cl_action_priority' ) ?? 10;
+
+							remove_action( $hook, ['\\Mwf\\CustomLayouts\\FrontEnd', "render_{$override_id }"], $override_priority );
+						}
+
+					}, 0 );
+
+				}
+				/**
+				 * Add the main action
+				 */
+				add_action( $hook, ['\\Mwf\\CustomLayouts\\FrontEnd', "render_{$layout['id']}"], $layout['priority'] );
 			}
 
 			do_action( 'custom_layouts/after_hook', $layout );

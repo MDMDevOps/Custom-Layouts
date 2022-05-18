@@ -11,8 +11,8 @@ class Jetpack extends Framework {
 	 * Construct new instance
 	 *
 	 */
-	public function __construct() {
-
+	public function __construct()
+	{
 		if ( ! $this->isPluginActive( 'jetpack/jetpack.php' ) ) {
 			return false;
 		}
@@ -27,7 +27,8 @@ class Jetpack extends Framework {
 	 * @since 1.0.0
 	 * @see  https://developer.wordpress.org/reference/functions/add_filter/
 	 */
-	public function addActions() {
+	public function addActions()
+	{
 		Subscriber::addAction( 'loop_start', [$this, 'removeSharingInject'] );
 	}
 	/**
@@ -38,24 +39,26 @@ class Jetpack extends Framework {
 	 *
 	 * @since 1.0.0
 	 */
-	public function addFilters() {
+	public function addFilters()
+	{
 		Subscriber::addFilter( 'custom_layouts/template_parts', [$this, 'addTemplates'] );
 		Subscriber::addFilter( 'custom_layouts/template_scope', [$this, 'templateScope'] );
 
 	}
 
-	public function addTemplates( $templates ) {
+	public function addTemplates( $templates )
+	{
 		return array_merge(
 			$templates,
 			[
-				'jetpack-sharing' => 'Social Sharing - Jetpack',
+				'core/jetpack/sharing' => 'Social Sharing - Jetpack',
 			]
 		);
 	}
 
-	public function removeSharingInject() {
+	public function removeSharingInject()
+	{
 		remove_filter( 'the_content', 'sharing_display', 19 );
-
 		remove_filter( 'the_excerpt', 'sharing_display', 19 );
 
 		if ( class_exists( 'Jetpack_Likes' ) ) {
@@ -63,7 +66,8 @@ class Jetpack extends Framework {
 		}
 	}
 
-	public function sharing() {
+	public function sharing()
+	{
 		if ( function_exists( 'sharing_display' ) ) {
 			sharing_display( '', true );
 		}
@@ -74,7 +78,8 @@ class Jetpack extends Framework {
 		}
 	}
 
-	public function templateScope( $_scope ) {
+	public function templateScope( $_scope )
+	{
 		$_scope['jetpack'] = $this;
 		return $_scope;
 	}

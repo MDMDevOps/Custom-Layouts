@@ -67,18 +67,23 @@ class Admin extends Framework {
 		/**
 		 * General Option
 		 */
-		Container::make( 'post_meta', 'Layout Options' )
+		Container::make( 'post_meta', 'Content Settings' )
 			->set_context( 'normal' )
 			->set_classes( 'custom_layout_metabox' )
 			->where( 'post_type', 'IN', ['custom-layout'] )
-			->add_fields( array_merge(
-				$this->getEditorFields(),
-				$this->getActionFields(),
-			) );
+			->add_fields($this->getEditorFields());
+		/**
+		 * General Option
+		 */
+		Container::make( 'post_meta', 'Hook Settings' )
+			->set_context( 'normal' )
+			->set_classes( 'custom_layout_metabox' )
+			->where( 'post_type', 'IN', ['custom-layout'] )
+			->add_fields($this->getActionFields());
 		/**
 		 * Inclusion Rules
 		 */
-		Container::make( 'post_meta', 'Display On' )
+		Container::make( 'post_meta', 'Display Settings : Show' )
 			->set_context( 'normal' )
 			->set_classes( 'custom_layout_metabox' )
 			->where( 'post_type', 'IN', ['custom-layout'] )
@@ -88,7 +93,7 @@ class Admin extends Framework {
 		/**
 		 * Exclusion Rules
 		 */
-		Container::make( 'post_meta', 'Hide On' )
+		Container::make( 'post_meta', 'Display Settings : Hide' )
 			->set_context( 'normal' )
 			->set_classes( 'custom_layout_metabox' )
 			->where( 'post_type', 'IN', ['custom-layout'] )
@@ -182,7 +187,6 @@ class Admin extends Framework {
 		        	[
 			            Field::make( 'complex', 'cl_exclusion_group', '' )
 			                ->set_layout( 'tabbed-horizontal' )
-			                ->set_min( 1 )
 			                ->setup_labels(
 			                	[
 			                		'singular_name' => 'Condition',
@@ -492,23 +496,19 @@ class Admin extends Framework {
 			);
 		$fields[] = Field::make( 'textarea', 'cl_code_editor', __( 'Custom Code' ) )
 			->set_rows( 10 )
-        	->set_conditional_logic(
-        		[
-	    	        'relation' => 'AND',
-	    	        [
-	    	            'field' => 'cl_editor_type',
-	    	            'value' => 'code', // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
-	    	            'compare' => '=', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
-	    	        ]
-	    	    ]
-    		);
+            ->set_classes( 'cl_ace' );
+        	// ->set_conditional_logic(
+        	// 	[
+	    	//         'relation' => 'AND',
+	    	//         [
+	    	//             'field' => 'cl_editor_type',
+	    	//             'value' => 'code', // Optional, defaults to "". Should be an array if "IN" or "NOT IN" operators are used.
+	    	//             'compare' => '=', // Optional, defaults to "=". Available operators: =, <, >, <=, >=, IN, NOT IN
+	    	//         ]
+	    	//     ]
+    		// );
     	$fields[] = Field::make( 'select', 'cl_template_part', __( 'Template Part' ) )
-    		->set_options( apply_filters( 'custom_layouts/template_parts',
-	    			[
-	    				'author-box' => __( 'Author Box', 'scaffolding' ),
-	    			]
-    			)
-    		)
+    		->set_options( apply_filters( 'custom_layouts/template_parts',[] ))
         	->set_conditional_logic(
         		[
 	    	        'relation' => 'AND',
@@ -516,6 +516,45 @@ class Admin extends Framework {
 	    	            'field' => 'cl_editor_type',
 	    	            'value' => 'part',
 	    	            'compare' => '=',
+	    	        ]
+	    	    ]
+    		);
+    	$fields[] = Field::make( 'select', 'cl_container', __( 'Container' ) )
+    		->set_default_value( 'div' )
+    		->set_options(
+    			[
+    				'div' => __( 'div', 'scaffolding' ),
+    				'section' => __( 'section', 'scaffolding' ),
+    				'header' => __( 'header', 'scaffolding' ),
+    				'footer' => __( 'footer', 'scaffolding' ),
+    				'aside' => __( 'aside', 'scaffolding' ),
+    				'span' => __( 'span', 'scaffolding' ),
+    				'0' => __( 'none', 'scaffolding' ),
+    			]
+    		)
+            ->set_conditional_logic(
+        		[
+	    	        'relation' => 'AND',
+	    	        [
+	    	            'field' => 'cl_editor_type',
+	    	            'value' => 'code',
+	    	            'compare' => '!=',
+	    	        ]
+	    	    ]
+    		);
+    	$fields[] = Field::make( 'text', 'crb_container_class', __( 'Container Class(s)' ) )
+        	->set_conditional_logic(
+        		[
+	    	        'relation' => 'AND',
+	    	        [
+	    	            'field' => 'cl_container',
+	    	            'value' => '0',
+	    	            'compare' => '!=',
+                    ],
+                    [
+                        'field' => 'cl_editor_type',
+                        'value' => 'code',
+                        'compare' => '!=',
 	    	        ]
 	    	    ]
     		);
@@ -570,6 +609,10 @@ class Admin extends Framework {
 			->set_default_value( 10 )
 			->set_width( 20 );
 
+		$fields[] = Field::make( 'checkbox', 'cl_action_disable_all', 'Replace Content' )
+			->set_help_text( 'Disable <strong>all</strong> other actions attached to the same hook(s)' )
+			->set_option_value( '1' );
+
 		$layout_args = [
 			'posts_per_page' => -1,
 			'post_type' => [ 'custom-layout' ],
@@ -591,9 +634,18 @@ class Admin extends Framework {
 
 		if ( ! empty( $override_options ) ) {
 			$fields[] = Field::make( 'multiselect', 'cl_action_hook_override', __( 'Template Override' ) )
-				->set_help_text( 'Override (disable) other templates in the same area' )
-				->set_options( $override_options );
+				->set_help_text( 'Override (disable) specific other custom templates attached to the same hook(s)' )
+				->set_options( $override_options )
+				->set_conditional_logic(
+					[
+						[
+							'field' => 'cl_action_disable_all',
+							'value' => false,
+						]
+					]
+				);
 		}
+
     	return $fields;
 	}
 
@@ -603,7 +655,8 @@ class Admin extends Framework {
 	 * @since 1.0.0
 	 */
 	public function enqueueScripts() {
-		wp_enqueue_script( __NAMESPACE__ . '\admin', MWF_CUSTOMLAYOUTS_URL . '/assets/js/admin' . MWF_CUSTOMLAYOUTS_ASSET_PREFIX . '.js', ['jquery'], MWF_CUSTOMLAYOUTS_VERSION, true );
+        wp_enqueue_script(__NAMESPACE__ . '\codemirror', MWF_CUSTOMLAYOUTS_URL . '/assets/js/codemirror.js', [], MWF_CUSTOMLAYOUTS_VERSION, true);
+		wp_enqueue_script( __NAMESPACE__ . '\admin', MWF_CUSTOMLAYOUTS_URL . '/assets/js/admin' . MWF_CUSTOMLAYOUTS_ASSET_PREFIX . '.js', ['jquery', __NAMESPACE__ . '\codemirror'], MWF_CUSTOMLAYOUTS_VERSION, true );
 	}
 	/**
 	 * Register the css
@@ -611,6 +664,7 @@ class Admin extends Framework {
 	 * @since 1.0.0
 	 */
 	public function enqueueStyles() {
+        wp_enqueue_style(__NAMESPACE__ . '\codemirror', MWF_CUSTOMLAYOUTS_URL . '/assets/css/codemirror.css', [], MWF_CUSTOMLAYOUTS_VERSION, 'all');
 		wp_enqueue_style(  __NAMESPACE__ . '\admin', MWF_CUSTOMLAYOUTS_URL . '/assets/css/admin' . MWF_CUSTOMLAYOUTS_ASSET_PREFIX . '.css', [], MWF_CUSTOMLAYOUTS_VERSION, 'all' );
 	}
 

@@ -12,7 +12,7 @@
  * Plugin URI:  https://www.midwestfamilymadison.com
  * GitHub Plugin URI:https://github.com/MDMDevOps/Custom-Layouts
  * Description: Custom layouts for (almost) any site
- * Version:     0.1.0
+ * Version:     0.1.3
  * Author:      Mid-West Family
  * Author URI:  https://www.midwestfamilymadison.com
  * License:     GPL-2.0+
@@ -39,7 +39,7 @@ if ( ! class_exists( '\Mwf\CustomLayouts\Plugin' ) ) {
 			/**
 			 * Create plugin constants
 			 */
-			define( 'MWF_CUSTOMLAYOUTS_VERSION', '0.1.0' );
+			define( 'MWF_CUSTOMLAYOUTS_VERSION', '0.1.3' );
 			define( 'MWF_CUSTOMLAYOUTS_ASSET_PREFIX', $this->isDev() ? '' : '.min' );
 			define( 'MWF_CUSTOMLAYOUTS_URL', plugin_dir_url( __FILE__ ) );
 			define( 'MWF_CUSTOMLAYOUTS_PATH', plugin_dir_path( __FILE__ ) );
@@ -92,6 +92,17 @@ if ( ! class_exists( '\Mwf\CustomLayouts\Plugin' ) ) {
 			 * Register controller functions
 			 */
 			new Controller();
+            /**
+             * Register components
+             */
+            $components = $this->getClasses('includes/Components');
+
+            foreach ($components as $component) {
+
+                $class = __NAMESPACE__ . '\\Components\\' . $component;
+
+                new $class;
+            }
 			/**
 			 * Register theme addons
 			 */
@@ -114,23 +125,6 @@ if ( ! class_exists( '\Mwf\CustomLayouts\Plugin' ) ) {
 
 				new $class;
 			}
-			// foreach( $widgets as $widget_name ) {
-
-			// 	$widget = __NAMESPACE__ . '\\Widgets\\' . $widget_name;
-
-			// 	register_widget( $widget );
-			// }
-			/**
-			 * Theme support
-			 */
-			new Themes\Astra();
-			new Themes\Genesis();
-			new Themes\Divi();
-			/**
-			 * Page builder support
-			 */
-			// new Plugins\FLBuilder();
-			// new Plugins\Elementor();
 		}
 
 		/**

@@ -1,24 +1,24 @@
 <?php return array (
   'root' => 
   array (
-    'pretty_version' => '1.0.0+no-version-set',
-    'version' => '1.0.0.0',
+    'pretty_version' => 'dev-master',
+    'version' => 'dev-master',
     'aliases' => 
     array (
     ),
-    'reference' => NULL,
+    'reference' => 'e110c09baea1e17b7c2f836beb13620558aa6e9a',
     'name' => '__root__',
   ),
   'versions' => 
   array (
     '__root__' => 
     array (
-      'pretty_version' => '1.0.0+no-version-set',
-      'version' => '1.0.0.0',
+      'pretty_version' => 'dev-master',
+      'version' => 'dev-master',
       'aliases' => 
       array (
       ),
-      'reference' => NULL,
+      'reference' => 'e110c09baea1e17b7c2f836beb13620558aa6e9a',
     ),
     'altorouter/altorouter' => 
     array (
@@ -64,6 +64,15 @@
       array (
       ),
       'reference' => '2ae6773c004b873a1b0456613b14852c1a436a96',
+    ),
+    'squizlabs/php_codesniffer' => 
+    array (
+      'pretty_version' => '3.6.2',
+      'version' => '3.6.2.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '5e4e71592f69da17871dba6e80dd51bce74a351a',
     ),
     'symfony/polyfill-ctype' => 
     array (

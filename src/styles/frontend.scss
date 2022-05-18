@@ -212,32 +212,69 @@
 }
 
 .cl-related-posts {
-	display: grid;
-	grid-template-columns: repeat( var( --cl-related-grid-columns, 1 ), minmax( 0, 1fr ) );
-	grid-template-rows: minmax( min-content, max-content );
-	gap : var( --cl-box-padding, 1em );
-	@include media('min-width: tablet-small') {
-		--cl-related-grid-columns : 2;
+	&.post-grid {
+		display: grid;
+		grid-template-columns: repeat( var( --cl-related-grid-columns, 1 ), minmax( 0, 1fr ) );
+		grid-template-rows: minmax( min-content, max-content );
+		gap : var( --cl-box-padding, 1em );
+		@include media('min-width: tablet-small') {
+			--cl-related-grid-columns : 2;
+		}
+		@include media('min-width: tablet') {
+			--cl-related-grid-columns : 3;
+		}
+		.cl-related-post {
+			background: var( --cl-box-background, #fff );
+			.cl-related-entry-title {
+				font-size: 1.25rem;
+				margin: 0;
+			}
+			.cl-related-post-link {
+				display: flex;
+				flex-direction: column;
+				gap: var( --cl-box-padding, 1em );
+				// padding: var( --cl-box-padding, 1em );
+			}
+		}
+		.cl-related-post-excerpt {
+			max-height: 5em;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
 	}
-	@include media('min-width: tablet') {
-		--cl-related-grid-columns : 3;
-	}
-	.cl-related-post {
-		background: var( --cl-box-background, #fff );
+	&.post-list {
+		list-style-type: none !important;
+		list-style-position: inside !important;
+		margin: 0 !important;
+		padding: 0 !important;
+		display: flex;
+		flex-direction: column;
+		gap: var( --cl-box-padding, 1em );
+		li {
+			list-style-type: none !important;
+			list-style-position: inside !important;
+		}
 		.cl-related-entry-title {
-			font-size: 1.25rem;
-			margin: 0;
+			font-size: 1rem;
+			margin: 0 !important;
+			padding: 0 !important;
+			line-height: 1;
 		}
 		.cl-related-post-link {
 			display: flex;
-			flex-direction: column;
+			flex-direction: row;
+			flex-wrap: nowrap;
 			gap: var( --cl-box-padding, 1em );
-			// padding: var( --cl-box-padding, 1em );
+			align-items: center;
 		}
-	}
-	.cl-related-post-excerpt {
-		max-height: 6em;
-		overflow: hidden;
-		text-overflow: ellipsis;
+		.title-container {
+			flex: 1;
+			padding: var( --cl-box-padding, 1em );
+			padding-left: 0;
+		}
+		.thumbnail-container {
+			width: 25%;
+			max-width: 80px;
+		}
 	}
 }

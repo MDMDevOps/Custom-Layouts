@@ -1,0 +1,30 @@
+{% if contextual_related_posts %}
+
+	<h4>Related Posts</h4>
+
+	<ul class="cl-related-posts post-list">
+		{% for post in contextual_related_posts %}
+			<li class="cl-related-post">
+				<a href="{{post.link}}" class="cl-related-post-link" rel="bookmark">
+
+					{% if post.thumbnail.src %}
+						<div class="thumbnail-container">
+							<img
+								src="{{ post.thumbnail.src( 'post-thumbnail' ) }}"
+								class="cl-related-post-thumbnail"
+								alt="Image for {{ post.title }}"
+								srcset="{{ post.thumbnail.srcset }}"
+								sizes="{{ post.thumbnail.img_sizes }}"
+							/>
+						</div>
+					{% endif %}
+
+					<div class="title-container">
+						<h2 class="cl-related-entry-title">{{ post.title }}</h2>
+					</div>
+				</a>
+			</li>
+		{% endfor %}
+	</ul>
+
+{% endif %}

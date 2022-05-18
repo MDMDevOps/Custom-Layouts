@@ -40,15 +40,9 @@ class Astra extends Framework {
 	 */
 	public function getHooks( $hooks ) {
 		/**
-		 * Bail early if the theme already handled their own hooks
-		 */
-		if( ! empty( $hooks ) ) {
-			return $hooks;
-		}
-		/**
 		 * Add our known defaults
 		 */
-		$hooks = [
+        $default_hooks = [
 			'astra_html_before' => 'Astra Html Before',
 			'astra_head_top' => 'Astra Head Top',
 			'astra_head_bottom' => 'Astra Head Bottom',
@@ -100,6 +94,6 @@ class Astra extends Framework {
 			'astra_body_bottom' => 'Astra Body Bottom',
 			'astra_404_content_template' => '404 Content',
 		];
-		return $hooks;
+        return wp_parse_args($hooks, $default_hooks);
 	}
 }

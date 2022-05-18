@@ -1,0 +1,36 @@
+.custom-layout {
+	position: relative;
+}
+
+.custom-layout-edit {
+	position: absolute;
+	left: 0;
+	top: 2px;
+	color: #fff;
+	width: 30px;
+	height: 30px;
+	min-width: 30px;
+	min-height: 30px;
+	line-height: 1em!important;
+	font-size: 18px;
+	z-index: 5;
+	background: #0085ba!important;
+	border-radius: 50%;
+	border: 2px solid #fff;
+	box-shadow: 0 2px 1px rgba(46,68,83,.15);
+	text-align: center;
+	cursor: pointer;
+	box-sizing: border-box;
+	padding: 3px;
+	animation-fill-mode: both;
+	animation-duration: .4s;
+	text-shadow: 0 -1px 1px #006799, 1px 0 1px #006799, 0 1px 1px #006799, -1px 0 1px #006799;
+	svg {
+		fill: #fff;
+		min-width: 20px;
+		min-height: 20px;
+		width: 20px;
+		height: 20px;
+		margin: auto;
+	}
+}

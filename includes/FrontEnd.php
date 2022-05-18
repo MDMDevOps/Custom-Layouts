@@ -18,6 +18,9 @@ class FrontEnd extends Framework {
 	 */
 	public function addActions() {
 		Subscriber::addAction( 'custom_layouts/before_hook', [$this, 'maybeEnqueueScripts'] );
+		Subscriber::addAction( 'custom_layout/before_render', [$this, 'renderContainer'], 1 );
+		Subscriber::addAction( 'custom_layout/after_render', [$this, 'renderContainer'], 20 );
+
 	}
 	/**
 	 * Register shortcodes
@@ -47,13 +50,14 @@ class FrontEnd extends Framework {
 		Subscriber::addFilter( 'custom_layout/the_content', 'do_shortcode' );
 		Subscriber::addFilter( 'custom_layout/the_content', 'wp_make_content_images_responsive' );
 		Subscriber::addFilter( 'custom_layout/the_content', 'prepend_attachment' );
-		// Subscriber::addFilter( 'get_avatar_data', [$this, 'customGravitar'], 100, 2 );
+		Subscriber::addFilter( 'custom_layouts/template_parts/args', [$this, 'filterTemplateArgs'], 1 );
+
 	}
 	/**
 	 * Check if scripts / styles need enqueed
 	 */
 	public function maybeEnqueueScripts( $layout ) {
-		if ( $layout['type'] === 'part' ) {
+		if ( $layout['type'] === 'part' || apply_filters( 'custom_layouts/enqueue_frontend_assets', false ) ) {
 			add_action( 'wp_enqueue_scripts', function() {
 				if ( ! wp_script_is( __NAMESPACE__ . '\frontend', 'enqueued' ) ) {
 					$this->enqueueScripts();
@@ -98,14 +102,6 @@ class FrontEnd extends Framework {
 
 		$self = new self;
 
-		$self->render( $layout );
-
-
-	}
-	private function render( $layout ) {
-
-		$type = carbon_get_post_meta( $layout->ID, 'cl_editor_type' );
-
 		$current_action = current_action();
 
 		if ( $current_action === 'the_content' ) {
@@ -113,7 +109,34 @@ class FrontEnd extends Framework {
 			$priority = carbon_get_post_meta( $layout->ID, 'cl_action_priority' );
 
 			ob_start();
+
+			$self->render( $layout );
+
+			$output = ob_get_clean();
+
+			if ( carbon_get_post_meta( $layout->ID, 'cl_action_disable_all' ) ) {
+				return $output;
+			}
+
+			elseif ( intval( $priority ) < 5 ) {
+				return $output . $args[0];
+			}
+
+			else {
+				return $args[0] . $output;
+			}
+
+		} else {
+			$self->render( $layout );
 		}
+	}
+	private function render( $layout ) {
+
+		if ( get_the_id() === $layout->ID ) {
+			return false;
+		}
+
+		$type = carbon_get_post_meta( $layout->ID, 'cl_editor_type' );
 
 		do_action( 'custom_layout/before_render', $layout );
 
@@ -130,17 +153,33 @@ class FrontEnd extends Framework {
 		}
 
 		do_action( 'custom_layout/after_render', $layout );
+	}
+	/**
+	 * Render container
+	 */
+	public function renderContainer( $layout ) {
+		$container = carbon_get_post_meta( $layout->ID, 'cl_container' );
 
-		if ( $current_action === 'the_content' ) {
-			$output = ob_get_clean();
+		$type = carbon_get_post_meta( $layout->ID, 'cl_editor_type' );
 
-			if ( intval( $priority ) < 5 ) {
-				return $output . $args[0];
-			}
+		if ( ! $container || $type === 'code' ) {
+			return;
+		}
 
-			else {
-				return $args[0] . $output;
-			}
+		if ( current_action() === 'custom_layout/before_render' ) {
+
+			$classes = carbon_get_post_meta( $layout->ID, 'crb_container_class' );
+
+			$classes = trim( 'custom-layout ' . $classes );
+
+			printf( '<%s id="custom-layout-%s" class="%s">',
+				$container,
+				$layout->ID,
+				$classes
+			);
+		}
+		else {
+			echo "</{$container}>";
 		}
 	}
 	/**
@@ -155,13 +194,13 @@ class FrontEnd extends Framework {
 		else {
 			echo apply_filters( 'custom_layout/the_content', get_the_content( null, true, $layout ) );
 		}
-
 	}
 	/**
 	 * Render custom code content type
 	 */
 	private function renderCode( $layout ) {
-		echo carbon_get_post_meta( $layout->ID, 'cl_code_editor' );
+		$string = carbon_get_post_meta( $layout->ID, 'cl_code_editor' );
+        $this->renderString( $string );
 	}
 	/**
 	 * Render a timber/php template
@@ -198,7 +237,7 @@ class FrontEnd extends Framework {
 			/**
 			 * Set cache
 			 */
-			wp_cache_set( 'template_scope', $_scope, 'custom_layouts' );
+			wp_cache_set( 'template_scope', $_scope, 'custom_layouts', 60 * 60 );
 			/**
 			 * Send flyin'
 			 */
@@ -207,6 +246,29 @@ class FrontEnd extends Framework {
 			require $template;
 		}
 	}
+
+    public function renderString( $string ) {
+        /**
+         * Attempt to get from cache
+         */
+        $_scope = wp_cache_get('template_scope', 'custom_layouts');
+        /**
+         * Maybe get from timber if not cached
+         */
+        $_scope = !empty($_scope) ? $_scope : Timber::context();
+        /**
+         * Allow filtering
+         */
+        $_scope = apply_filters('custom_layouts/template_scope', $_scope);
+        /**
+         * Set cache
+         */
+        wp_cache_set('template_scope', $_scope, 'custom_layouts', 60 * 60 );
+        /**
+         * Send flyin'
+         */
+        Timber::render_string($string, $_scope);
+    }
 	/**
 	 * Generate all the path combinations for locating templates
 	 */
@@ -273,6 +335,28 @@ class FrontEnd extends Framework {
 
 		return $paths;
 	}
+
+	public function filterTemplateArgs( $args ) {
+		/**
+		 * Check if it's a core template
+		 */
+
+		$core = strpos( $args['slug'], 'core/');
+
+		if ( $core === false || $core > 0 ) {
+			return $args;
+		}
+
+		$parts = explode('/', $args['slug']);
+
+		$args['slug'] = $parts[1];
+
+		if ( isset( $parts[2] ) ) {
+			$args['name'] = $parts[2];
+		}
+		return $args;
+	}
+
 	/**
 	 * Wrapper for get_template_part
 	 *
@@ -287,9 +371,15 @@ class FrontEnd extends Framework {
 			return;
 		}
 
-		$slug = apply_filters( "custom_layouts/template/{$slug}", $slug );
+		$args = apply_filters( 'custom_layouts/template_parts/args', [
+			'slug' => $slug,
+			'name' => $name,
+			'force' => $force
+		] );
 
-		$name = apply_filters( "custom_layouts/template/{$slug}/name", $name );
+		$slug = apply_filters( "custom_layouts/template/{$args['slug']}", $args['slug']);
+
+		$name = apply_filters( "custom_layouts/template/{$args['slug']}/name", $args['name'] );
 
 		$views = $this->getViews();
 
@@ -305,7 +395,7 @@ class FrontEnd extends Framework {
 		/**
 		 * Generate paths to search
 		 */
-		if ( $force ) {
+		if ( $args['force'] ) {
 			$paths = [ $slug ];
 		} else {
 			$paths = apply_filters( 'custom_layouts/templates/paths', $this->generatePaths(
@@ -465,20 +555,6 @@ class FrontEnd extends Framework {
 		}
 		return $this->views;
 	}
-	/**
-	 * Filter the gravatar for custom author box
-	 */
-	function customGravitar( $args, $id_or_email ) {
 
-		$user = $id_or_email;
-		$custom_image_id = carbon_get_user_meta( $user, 'cl_author_image' );
-
-		if ( $custom_image_id ) {
-			$custom_image = wp_get_attachment_image_url( $custom_image_id, [100, 100] );
-			$args['url'] = $custom_image;
-		}
-
-		return $args;
-	}
 
 }

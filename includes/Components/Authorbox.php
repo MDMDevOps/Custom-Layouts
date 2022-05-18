@@ -1,6 +1,6 @@
 <?php
 
-namespace Mwf\CustomLayouts\Plugins;
+namespace Mwf\CustomLayouts\Components;
 
 use Mwf\CustomLayouts\Framework;
 use Mwf\CustomLayouts\Subscriber;

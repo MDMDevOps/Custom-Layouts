@@ -29,7 +29,7 @@ class Layouts extends Framework {
 	 */
 	public function addActions() {
 		Subscriber::addAction( 'save_post_custom-layout', [$this, 'invalidateTransient'] );
-		Subscriber::addAction( 'add_meta_boxes-layout', [$this, 'removeYoastMetabox'], 999 );
+		Subscriber::addAction( 'add_meta_boxes', [$this, 'removeYoastMetabox'], 999 );
 	}
 	/**
 	 * Register custom post type
@@ -102,6 +102,6 @@ class Layouts extends Framework {
 	 * Remove the yoast metabox, it's unneeded
 	 */
 	public function removeYoastMetabox() {
-		remove_meta_box( 'wpseo_meta', 'custom-layout', 'normal' );
+		remove_meta_box( 'wpseo_meta', self::NAME, 'normal' );
 	}
 }

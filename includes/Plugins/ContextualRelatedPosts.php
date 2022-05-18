@@ -28,8 +28,7 @@ class ContextualRelatedPosts extends Framework {
 	 * @see  https://developer.wordpress.org/reference/functions/add_filter/
 	 */
 	public function addActions() {
-
-		// Subscriber::addAction( 'custom_layout/before_render', [$this, 'maybeRender'] );
+        Subscriber::addFilter('crp_meta_box_post_types', [$this, 'removeMetabox'], 999);
 	}
 	/**
 	 * Register filters
@@ -49,7 +48,8 @@ class ContextualRelatedPosts extends Framework {
 		return array_merge(
 			$templates,
 			[
-				'contextual-related-posts' => 'Contextual Related Posts',
+				'core/contextual-related-posts/grid' => 'Contextual Related Posts - Grid',
+				'core/contextual-related-posts/list' => 'Contextual Related Posts - List',
 			]
 		);
 	}
@@ -59,7 +59,7 @@ class ContextualRelatedPosts extends Framework {
 		$related_raw = get_crp_posts_id();
 
 		if ( empty( $related_raw ) ) {
-			$_scope['related_posts'] = [];
+			$_scope['contextual_related_posts'] = [];
 			return $_scope;
 		}
 
@@ -86,8 +86,20 @@ class ContextualRelatedPosts extends Framework {
 			}
 		}
 
-		$_scope['related_posts'] = $posts;
+		$_scope['contextual_related_posts'] = $posts;
 
 		return $_scope;
 	}
+    /**
+     * Remove post type from contextual related posts metabox
+     *
+     * @param array $types Array of supported post types
+     * @return $types
+     */
+    public function removeMetabox( $types ) {
+        if ( isset( $types['custom-layout'] ) ) {
+            unset($types['custom-layout'] );
+        }
+        return $types;
+    }
 }

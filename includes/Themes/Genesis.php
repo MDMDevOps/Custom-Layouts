@@ -40,15 +40,9 @@ class Genesis extends Framework {
 	 */
 	public function getHooks( $hooks ) {
 		/**
-		 * Bail early if the theme already handled their own hooks
-		 */
-		if( ! empty( $hooks ) ) {
-			return $hooks;
-		}
-		/**
 		 * Add our known defaults
 		 */
-		$hooks = [
+		$default_hooks = [
 			'genesis_before' => 'Genesis Before',
 			'genesis_before_header' => 'Genesis Before header',
 			'genesis_header_right' => 'Genesis Header Right',
@@ -79,6 +73,6 @@ class Genesis extends Framework {
 			'genesis_after_footer' => 'Genesis After Footer',
 			'genesis_after' => 'Genesis After',
 		];
-		return $hooks;
+		return wp_parse_args( $hooks, $default_hooks );
 	}
 }
