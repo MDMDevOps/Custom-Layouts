@@ -7,13 +7,9 @@
 			<div class="cl-related-post">
 				<a href="{{post.link}}" class="cl-related-post-link" rel="bookmark">
 					{% if post.thumbnail.src %}
-						<img
-							src="{{ post.thumbnail.src( 'post-thumbnail' ) }}"
-							class="cl-related-post-thumbnail"
-							alt="Image for {{ post.title }}"
-							srcset="{{ post.thumbnail.srcset }}"
-							sizes="{{ post.thumbnail.img_sizes }}"
-						/>
+						<span style="background-image: url('{{ post.thumbnail.src( 'post-thumbnail' ) }}');" class="cl-related-post-thumbnail-container">
+							<span class="cl-screen-reader-text">{{ post.title }}</span>
+						</span>
 					{% endif %}
 					<h2 class="cl-related-entry-title">{{ post.title }}</h2>
 

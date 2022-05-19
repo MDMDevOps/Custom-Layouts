@@ -12,7 +12,7 @@
  * Plugin URI:  https://www.midwestfamilymadison.com
  * GitHub Plugin URI:https://github.com/MDMDevOps/Custom-Layouts
  * Description: Custom layouts for (almost) any site
- * Version:     0.1.3
+ * Version:     0.1.4
  * Author:      Mid-West Family
  * Author URI:  https://www.midwestfamilymadison.com
  * License:     GPL-2.0+
@@ -39,7 +39,7 @@ if ( ! class_exists( '\Mwf\CustomLayouts\Plugin' ) ) {
 			/**
 			 * Create plugin constants
 			 */
-			define( 'MWF_CUSTOMLAYOUTS_VERSION', '0.1.3' );
+			define( 'MWF_CUSTOMLAYOUTS_VERSION', '0.1.4' );
 			define( 'MWF_CUSTOMLAYOUTS_ASSET_PREFIX', $this->isDev() ? '' : '.min' );
 			define( 'MWF_CUSTOMLAYOUTS_URL', plugin_dir_url( __FILE__ ) );
 			define( 'MWF_CUSTOMLAYOUTS_PATH', plugin_dir_path( __FILE__ ) );

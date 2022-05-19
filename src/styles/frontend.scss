@@ -149,6 +149,20 @@
   content: "\ead2";
 }
 
+.cl-screen-reader-text {
+	clip: rect(0px, 0px, 0px, 0px);
+	-webkit-clip-path: rect( 0px 0px, 0px 0px, 0px 0px, 0px 0px);
+	clip-path: rect( 0px 0px, 0px 0px, 0px 0px, 0px 0px);
+	position: absolute !important;
+	height: 1px;
+	width: 1px;
+	margin: -1px;
+	padding: 0;
+	border: 0;
+	font-size: 0;
+	overflow: hidden;
+}
+
 #cl_author {
 	padding: var( --cl-box-padding, 1em );
 	background: var( --cl-box-background, #fff );
@@ -227,7 +241,8 @@
 			background: var( --cl-box-background, #fff );
 			.cl-related-entry-title {
 				font-size: 1.25rem;
-				margin: 0;
+				margin: 0 !important;
+				padding: 0 !important;
 			}
 			.cl-related-post-link {
 				display: flex;
@@ -240,6 +255,13 @@
 			max-height: 5em;
 			overflow: hidden;
 			text-overflow: ellipsis;
+		}
+		.cl-related-post-thumbnail-container {
+			height: 0;
+			padding-bottom: 62.5%;
+			background-size: cover;
+			background-repeat: no-repeat;
+			background-position: center center;
 		}
 	}
 	&.post-list {
